@@ -15,9 +15,9 @@ datasource db {
 
 model Todo {
   id          Int      @id @default(autoincrement())
-  titulo      String
-  descricao   String?
-  status      String   @default("pendente") // Exemplos de status: "pendente", "concluído"
+  title      String
+  description   String?
+  status      String   @default("pending") // Exemplos de status: "pendente", "concluído"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

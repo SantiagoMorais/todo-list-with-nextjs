@@ -1,8 +1,32 @@
+import { db } from "@/db";
+import { redirect } from "next/navigation";
+
 const TodoPage = () => {
    const handleAddTodo = async (formData: FormData) => {
       "use server";
 
       console.log(formData);
+
+      // vamos abstrair os dados do formulário
+      const formTitle = formData.get("title");
+      const formDescription = formData.get("description");
+      const status = "pending";
+
+      const title = typeof formTitle === "string" ? formTitle : "";
+      const description =
+         typeof formDescription === "string" ? formDescription : "";
+
+      const todo = await db.todo.create({
+         data: {
+            title,
+            description,
+            status,
+         },
+      });
+
+      console.log(todo);
+
+      redirect("/");
    };
 
    return (
