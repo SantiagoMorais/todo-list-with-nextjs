@@ -5,8 +5,6 @@ const TodoPage = () => {
    const handleAddTodo = async (formData: FormData) => {
       "use server";
 
-      console.log(formData);
-
       // vamos abstrair os dados do formulário
       const formTitle = formData.get("title");
       const formDescription = formData.get("description");
@@ -16,15 +14,13 @@ const TodoPage = () => {
       const description =
          typeof formDescription === "string" ? formDescription : "";
 
-      const todo = await db.todo.create({
+      await db.todo.create({
          data: {
             title,
             description,
             status,
          },
       });
-
-      console.log(todo);
 
       redirect("/");
    };
