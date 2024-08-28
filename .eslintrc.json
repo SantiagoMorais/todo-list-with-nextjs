@@ -2,10 +2,9 @@
    "extends": ["next/core-web-vitals", "prettier"],
    "plugins": ["prettier"],
    "rules": {
-      "prettier/prettier": "error",
       "no-unused-vars": "warn",
       "no-console": ["warn", { "allow": ["warn", "error"] }],
-      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }], // No máximo uma linha vazia e nenhuma no final
-      "no-trailing-spaces": "error" // Não permite espaços em branco ao final das linhas
+      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }], 
+      "no-trailing-spaces": "error" 
    }
 }
