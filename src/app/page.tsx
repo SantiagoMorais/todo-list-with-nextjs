@@ -1,9 +1,23 @@
 import Link from "next/link";
 import { db } from "@/db";
+import Button from "@/components/button";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
    // ao utilizarmos um método await, precisamos mudar nosso componente para async
    const todos = await db.todo.findMany();
+
+   const handleDeleteTodo = async (formData: FormData) => {
+      "use server";
+
+      const id = Number(formData.get("id"));
+
+      await db.todo.delete({
+         where: { id },
+      });
+
+      redirect("/")
+   };
 
    return (
       <main className="container mx-auto p-4">
@@ -11,7 +25,10 @@ export default async function Home() {
          <div className="space-y-4">
             {/* Preciso retornar um parenteses () ao invés de chaves {} pois é um OBJETO */}
             {todos.map((todo) => (
-               <div key={todo.id} className="bg-gray-100 rounded-lg shadow px-2 py-1">
+               <div
+                  key={todo.id}
+                  className="bg-gray-100 rounded-lg shadow px-2 py-1"
+               >
                   <div className="flex justify-between items-start">
                      <div className="px-2">
                         <h2 className="text-xl font-semibold">{todo.title}</h2>
@@ -30,11 +47,10 @@ export default async function Home() {
                         >
                            Edit
                         </Link>
-                        <button
-                           className="bg-red-500 duration-300 hover:bg-red-400 font-bold text-white py-1 px-2 rounded"
-                        >
-                           Delete
-                        </button>
+                        <form action={handleDeleteTodo}>
+                           <input type="hidden" name="id" value={todo.id} />
+                           <Button>Delete</Button>
+                        </form>
                      </div>
                   </div>
                </div>
