@@ -19,7 +19,7 @@ export default async function Home() {
                      </div>
                      <div className="flex space-x-2 mt-3">
                         <Link
-                           href="/"
+                           href={`/todos/${todo.id}`}
                            className="bg-blue-500 duration-300 hover:bg-blue-400 font-bold text-white py-1 px-2 rounded"
                         >
                            Visualize
