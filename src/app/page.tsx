@@ -1,23 +1,11 @@
 import Link from "next/link";
 import { db } from "@/db";
 import Button from "@/components/button";
-import { redirect } from "next/navigation";
+import { handleDeleteTodo } from "@/actions";
 
 export default async function Home() {
    // ao utilizarmos um método await, precisamos mudar nosso componente para async
    const todos = await db.todo.findMany();
-
-   const handleDeleteTodo = async (formData: FormData) => {
-      "use server";
-
-      const id = Number(formData.get("id"));
-
-      await db.todo.delete({
-         where: { id },
-      });
-
-      redirect("/")
-   };
 
    return (
       <main className="container mx-auto p-4">
@@ -42,7 +30,7 @@ export default async function Home() {
                            Visualize
                         </Link>
                         <Link
-                           href="/"
+                           href={`/todos/${todo.id}/edit`}
                            className="bg-yellow-500 duration-300 hover:bg-yellow-400 font-bold text-white py-1 px-2 rounded"
                         >
                            Edit

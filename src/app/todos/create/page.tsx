@@ -1,30 +1,6 @@
-import { db } from "@/db";
-import { redirect } from "next/navigation";
+import { handleAddTodo } from "@/actions";
 
 const TodoPage = () => {
-   const handleAddTodo = async (formData: FormData) => {
-      "use server";
-
-      // vamos abstrair os dados do formulário
-      const formTitle = formData.get("title");
-      const formDescription = formData.get("description");
-      const status = "pending";
-
-      const title = typeof formTitle === "string" ? formTitle : "";
-      const description =
-         typeof formDescription === "string" ? formDescription : "";
-
-      await db.todo.create({
-         data: {
-            title,
-            description,
-            status,
-         },
-      });
-
-      redirect("/");
-   };
-
    return (
       <div className="max-w-md mx-auto mt-10">
          <h1 className="text-2xl font-bold text-center mb-6">

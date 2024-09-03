@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { findTodoById } from "@/actions";
 import { notFound } from "next/navigation";
 
 interface IShowTodo {
@@ -14,11 +14,7 @@ const ShowTodo: React.FC<IShowTodo> = async ({ params }) => {
 
    if (Number.isNaN(id)) return notFound();
 
-   const currentTodo = await db.todo.findFirst({
-      where: {
-         id,
-      },
-   });
+   const currentTodo = await findTodoById(id)
 
    if (!currentTodo) return notFound();
 
