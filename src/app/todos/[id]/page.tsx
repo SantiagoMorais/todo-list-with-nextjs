@@ -8,8 +8,6 @@ interface IShowTodo {
 }
 
 const ShowTodo: React.FC<IShowTodo> = async ({ params }) => {
-   await new Promise((a) => setTimeout(a, 2000))
-
    const id: number = Number(params.id);
 
    if (Number.isNaN(id)) return notFound();

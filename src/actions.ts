@@ -100,7 +100,7 @@ export const updateTodo = async (
          errors: {
             id: "",
             title: "",
-            description: ""
+            description: "",
          },
          values: { id, title, description },
       }
