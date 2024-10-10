@@ -14,9 +14,11 @@
       -  [Configuração do Schema](#configuração-do-schema)
       -  [Migração dos dados para o banco](#migração-dos-dados-para-o-banco)
 -  [Next](#next)
--  [Formulário](#formulário)
--  [Envio de dados ao banco](#envio-de-dados-ao-banco)
--  [Consulta de dados no banco](#consulta-de-dados-no-banco)
+   -  [Formulário](#formulário)
+   -  [Envio de dados ao banco](#envio-de-dados-ao-banco)
+   -  [Consulta de dados no banco](#consulta-de-dados-no-banco)
+   -  [Páginas dinâmicas e tratamento de páginas não encontradas](#páginas-dinâmicas-e-tratamento-de-páginas-não-encontradas)
+   - [Loading](#loading)
 
 ## Bibliotecas
 
@@ -36,12 +38,12 @@
 
 ## Objetivos
 
-- Criar todos, criando-os e acessando-os ao banco de dados SQLite via Prisma
-- Deletar todos do banco de dados
-- Editar todos do banco de dados
-- Definir todos de "pendentes" para "concluidos"
-- Visualizar detalhes do todo
-- Tudo isso manipulando dados do banco utilizando Prisma via Next de forma simples.
+-  Criar todos, criando-os e acessando-os ao banco de dados SQLite via Prisma
+-  Deletar todos do banco de dados
+-  Editar todos do banco de dados
+-  Definir todos de "pendentes" para "concluidos"
+-  Visualizar detalhes do todo
+-  Tudo isso manipulando dados do banco utilizando Prisma via Next de forma simples.
 
 ## Passos Iniciais
 
@@ -232,3 +234,134 @@ export const handleAddTodo = async (formData: FormData) => {
 5. Método do `next/navigation` para redirecionar o usuário para alguma página após conclusão da função.
 
 ### Consulta de dados no banco
+
+-  Para resgatar os dados recisamos mudar a função do componente para assíncrona
+
+-  O método findMany é p responsável por renderizar todos os dados na tabela usando Prisma e utilizamos o método map para renderizá-los no componente.
+
+```tsx
+// outras importações
+import { db } from "@/db"; // importação do banco de dados
+
+// Transformar nossa função em async
+export default async function Home() {
+   const todos = await db.todo.findMany(); // coletando TODOS os dados do banco
+
+   return (
+      <main>
+         <h1>Todos!</h1>
+         <div>
+            {todos.map((todo) => (
+               <div key={todo.id}>
+                  {/* Renderização dos dados do do banco */}
+               </div>
+            ))}
+         </div>
+      </main>
+   );
+}
+```
+
+As ações deste componente vamos trata-las a parte:
+
+```tsx
+<div>
+   <Link href={`/todos/${todo.id}`}>Visualize</Link>
+   <Link href={`/todos/${todo.id}/edit`}>Edit</Link>
+   <form action={handleDeleteTodo}>
+      <input type="hidden" name="id" value={todo.id} />
+      <Button>Delete</Button>
+   </form>
+</div>
+```
+
+1. Adicionamos dois botões que nos levarão para a visualização e edição do todo e nessas páginas teremos acesso ao id do todo
+2. O botão de `delete` usamos um formulário com um input escondido `type="hidden"` que quando ele é enviado por este nosso componente de `<Button>` o valor do id é enviado via `formData` para função responsável por deletar o todo.
+
+**handleDeleteTodo**
+
+Esta função está no nosso arquivo `src/actions.ts`, responsável por todas as ações do nosso banco de dados, e ele é estrytyradi assim:
+
+```ts
+export const handleDeleteTodo = async (formData: FormData) => {
+   // 1
+   const id = Number(formData.get("id"));
+
+   // 2
+   await db.todo.delete({
+      where: { id },
+   });
+
+   // 3
+   redirect("/");
+};
+```
+
+Coletamos o id do formData, coletando o valor do campo de nome `id`e já o envolvemos no método `Number()`, pois ele nos é enviado como uma string, mas precisamos de um `number` para utiliza-lo no banco. 2. usamos o método `.delete` do banco, onde o dado possui o id que recebemos e assim será excluido do banco de dados. 3. Usuário redirecionado para tela inicial.
+
+### Páginas dinâmicas e tratamento de páginas não encontradas
+
+-  Para criar a rota dinâmica dos `todos` individuais vamos utilizar páginas dinâmicas do Next. Consiste em criar uma pasta com um valor que é único e variável no item, por exemplo o id;
+-  Então a pasta terá o nome `[id]`, com um arquivo `page.js` dentro.
+
+![Páginas dinâmicas até o id](src/assets/screenshots/dinamicPageToId.png)
+
+-  Este dado dinâmico chega via props ao componente.
+-  Na página podemos utilizar o método findFirst do Prisma, e encontrar registro que estamos buscando com o `id` que recebemos via `props`.
+
+```tsx
+import { findTodoById } from "@/actions"; // 1
+import { notFound } from "next/navigation"; // 2
+
+interface IShowTodo {
+   params: {
+      id: string;
+   };
+}
+
+const ShowTodo: React.FC<IShowTodo> = async ({ params }) => {
+   const id: number = Number(params.id);
+   // Caso o id seja inválido, retornamos a função notFound();
+   if (Number.isNaN(id)) return notFound();
+
+   const currentTodo = await findTodoById(id);
+
+   // Validações para verificar se este dado existe
+   if (!currentTodo) return notFound();
+   return <div>{/*Renderização dos dados usando o currentTodo*/}</div>;
+};
+```
+
+1. Função responsável por usar o id e buscar os dados do `todo` no banco. Vamos abordá-lo em breve.
+2. Em Next.js, a função `notFound()` é da biblioteca `next/navigation`, assim o framework redireciona o usuário para a página de erro 404 personalizada (ou a página 404 padrão) do seu projeto.
+   -  Aqui só é necessário criar um arquivo na mesma pasta chamado `not-found.tsx` e se a função `notFound()` for executada o usuário é redirecionado para essa página onde você deve customizar e criar.
+
+A função `findoTodoById` é uma consulta simples ao banco que coleta os dados do `todo` pelo seu id:
+
+```ts
+export const findTodoById = async (id: number) => {
+   const todo = await db.todo.findFirst({
+      where: { id },
+   });
+
+   return todo;
+};
+```
+
+O método `findFirst()` basicamente retorna o primeiro registro que atenda ao parâmetro exigido, no caso, o `id` que é único. Assim somente um dado é retornado.
+
+### Loading
+
+Da mesma forma que podemos usar páginas dinâmicas colocando o nome dos arquivos como `page.tsx` ou `not-found.tsx` podemos criar o mesmo para o arquivo `loading.tsx` que será automaticamente renderizado quando a página estiver sob algum carregamento.
+
+Na nossa aplicação não estamos lidando com renderização de servidores, portanto podemos simular essa ação utilizando o `setTimeOut`.
+
+```tsx
+const ShowTodo: React.FC<IShowTodo> = async ({ params }) => {
+   await new Promise((a) => setTimeout(a, 2000));
+```
+
+Se o banco precisar de um tempo para renderizar o retorno do componente, enquanto este carregamento ocorre, o componente loading é executado:
+
+![Componente Loading](src/assets/screenshots/loadingComponent.png)
+

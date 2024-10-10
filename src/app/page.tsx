@@ -4,7 +4,6 @@ import Button from "@/components/button";
 import { handleDeleteTodo } from "@/actions";
 
 export default async function Home() {
-   // ao utilizarmos um método await, precisamos mudar nosso componente para async
    const todos = await db.todo.findMany();
 
    return (

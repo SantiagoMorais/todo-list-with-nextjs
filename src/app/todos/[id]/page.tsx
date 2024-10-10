@@ -12,7 +12,7 @@ const ShowTodo: React.FC<IShowTodo> = async ({ params }) => {
 
    if (Number.isNaN(id)) return notFound();
 
-   const currentTodo = await findTodoById(id)
+   const currentTodo = await findTodoById(id);
 
    if (!currentTodo) return notFound();
 
